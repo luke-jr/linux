@@ -803,9 +803,6 @@ at86rf230_rx(struct at86rf230_local *lp,
 
 	memcpy(skb_put(skb, len), rx_local_buf, len);
 
-	/* We do not put CRC into the frame */
-	skb_trim(skb, len - 2);
-
 	ieee802154_rx_irqsafe(lp->dev, skb, lqi);
 }
 

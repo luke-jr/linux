@@ -62,6 +62,8 @@ mac802154_subif_rx(struct ieee802154_dev *hw, struct sk_buff *skb, u8 lqi)
 	if (!(priv->hw.flags & IEEE802154_HW_OMIT_CKSUM)) {
 		u16 crc;
 
+		mac802154_monitors_rx(priv, skb);
+
 		if (skb->len < 2) {
 			pr_debug("got invalid frame\n");
 			goto fail;
@@ -72,9 +74,13 @@ mac802154_subif_rx(struct ieee802154_dev *hw, struct sk_buff *skb, u8 lqi)
 			goto fail;
 		}
 		skb_trim(skb, skb->len - 2); /* CRC */
+		mac802154_wpans_rx(priv, skb);
+
+		return;
 	}
 
 	mac802154_monitors_rx(priv, skb);
+	skb_trim(skb, skb->len - 2); /* CRC */
 	mac802154_wpans_rx(priv, skb);
 
 	return;
