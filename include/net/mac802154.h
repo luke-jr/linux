@@ -183,6 +183,7 @@ struct ieee802154_ops {
 					   u8 min_be, u8 max_be, u8 retries);
 	int		(*set_frame_retries)(struct ieee802154_dev *dev,
 					     s8 retries);
+	void		(*set_rx_flags)(struct ieee802154_dev *dev, int flags);
 };
 
 /* Basic interface to register ieee802154 device */

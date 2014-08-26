@@ -90,6 +90,7 @@ struct at86rf230_local {
 
 	bool tx_aret;
 	bool is_tx;
+	int rx_flags;
 	/* spinlock for is_tx protection */
 	spinlock_t lock;
 	struct completion tx_complete;
@@ -940,15 +941,16 @@ at86rf230_write_frame(void *context)
 	struct sk_buff *skb = lp->tx_skb;
 	u8 *buf = lp->tx.buf;
 	int rc;
+	int length = lp->dev->flags & IEEE802154_HW_OMIT_CKSUM ? skb->len + 2 : skb->len;
 
 	spin_lock(&lp->lock);
 	lp->is_tx = 1;
 	spin_unlock(&lp->lock);
 
 	buf[0] = CMD_FB | CMD_WRITE;
-	buf[1] = skb->len + 2;
+	buf[1] = length;
 	memcpy(buf + 2, skb->data, skb->len);
-	lp->tx.trx.len = skb->len + 2;
+	lp->tx.trx.len = length;
 	lp->tx.msg.complete = at86rf230_write_frame_complete;
 	rc = spi_async(lp->spi, &lp->tx.msg);
 	if (rc)
@@ -1235,6 +1237,24 @@ at86rf230_set_frame_retries(struct ieee802154_dev *dev, s8 retries)
 	return rc;
 }
 
+static void
+at86rf230_set_rx_flags(struct ieee802154_dev *dev, int flags)
+{
+	struct at86rf230_local *lp = dev->priv;
+	lp->rx_flags ^= flags;
+
+	if(lp->rx_flags & IFF_PROMISC)
+	{
+		lp->dev->flags &= ~IEEE802154_HW_OMIT_CKSUM;
+		at86rf230_write_subreg(lp, SR_AACK_PROM_MODE, 1);
+	}
+	else
+	{
+		lp->dev->flags |= IEEE802154_HW_OMIT_CKSUM;
+		at86rf230_write_subreg(lp, SR_AACK_PROM_MODE, 0);
+	}
+}
+
 static struct ieee802154_ops at86rf230_ops = {
 	.owner = THIS_MODULE,
 	.xmit = at86rf230_xmit,
@@ -1249,6 +1269,7 @@ static struct ieee802154_ops at86rf230_ops = {
 	.set_cca_ed_level = at86rf230_set_cca_ed_level,
 	.set_csma_params = at86rf230_set_csma_params,
 	.set_frame_retries = at86rf230_set_frame_retries,
+	.set_rx_flags = at86rf230_set_rx_flags,
 };
 
 static struct at86rf2xx_chip_data at86rf233_data = {
