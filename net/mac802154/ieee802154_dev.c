@@ -239,6 +239,13 @@ static int mac802154_set_frame_retries(struct wpan_phy *phy, s8 retries)
 	return priv->ops->set_frame_retries(&priv->hw, retries);
 }
 
+void mac802154_set_rx_flags(struct wpan_phy *phy, int flags)
+{
+	struct mac802154_priv *priv = wpan_phy_priv(phy);
+
+	priv->ops->set_rx_flags(&priv->hw, flags);
+}
+
 struct ieee802154_dev *
 ieee802154_alloc_device(size_t priv_data_len, struct ieee802154_ops *ops)
 {
@@ -361,6 +368,9 @@ int ieee802154_register_device(struct ieee802154_dev *dev)
 
 	priv->phy->add_iface = mac802154_add_iface;
 	priv->phy->del_iface = mac802154_del_iface;
+
+	if (priv->ops->set_rx_flags)
+		priv->phy->set_rx_flags = mac802154_set_rx_flags;
 
 	rc = wpan_phy_register(priv->phy);
 	if (rc < 0)

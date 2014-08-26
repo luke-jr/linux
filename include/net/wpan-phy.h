@@ -68,6 +68,7 @@ struct wpan_phy {
 	int (*set_csma_params)(struct wpan_phy *phy, u8 min_be, u8 max_be,
 			       u8 retries);
 	int (*set_frame_retries)(struct wpan_phy *phy, s8 retries);
+	void (*set_rx_flags)(struct wpan_phy *phy, int flags);
 
 	char priv[0] __attribute__((__aligned__(NETDEV_ALIGN)));
 };

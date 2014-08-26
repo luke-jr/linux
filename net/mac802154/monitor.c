@@ -86,10 +86,20 @@ void mac802154_monitors_rx(struct mac802154_priv *priv, struct sk_buff *skb)
 	rcu_read_unlock();
 }
 
+void mac802154_monitor_set_rx_flags(struct net_device *dev, int flags)
+{
+	struct mac802154_sub_if_data *priv = netdev_priv(dev);
+	struct wpan_phy *phy = priv->hw->phy;
+
+	if(phy->set_rx_flags)
+		return phy->set_rx_flags(phy, flags);
+}
+
 static const struct net_device_ops mac802154_monitor_ops = {
 	.ndo_open		= mac802154_slave_open,
 	.ndo_stop		= mac802154_slave_close,
 	.ndo_start_xmit		= mac802154_monitor_xmit,
+	.ndo_change_rx_flags	= mac802154_monitor_set_rx_flags,
 };
 
 void mac802154_monitor_setup(struct net_device *dev)

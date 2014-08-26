@@ -146,6 +146,16 @@ void mac802154_get_mac_params(struct net_device *dev,
 	mutex_unlock(&priv->hw->slaves_mtx);
 }
 
+void mac802154_wpan_set_rx_flags(struct net_device *dev, int flags)
+{
+	struct mac802154_sub_if_data *priv = netdev_priv(dev);
+	struct wpan_phy *phy = priv->hw->phy;
+
+	if(phy->set_rx_flags)
+		return phy->set_rx_flags(phy, flags);
+	return;
+}
+
 static int mac802154_wpan_open(struct net_device *dev)
 {
 	int rc;
@@ -357,6 +367,7 @@ static const struct net_device_ops mac802154_wpan_ops = {
 	.ndo_start_xmit		= mac802154_wpan_xmit,
 	.ndo_do_ioctl		= mac802154_wpan_ioctl,
 	.ndo_set_mac_address	= mac802154_wpan_mac_addr,
+	.ndo_change_rx_flags	= mac802154_wpan_set_rx_flags,
 };
 
 static void mac802154_wpan_free(struct net_device *dev)
