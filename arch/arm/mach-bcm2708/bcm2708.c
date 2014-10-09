@@ -35,6 +35,7 @@
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/spi/spi.h>
+#include <linux/spi/at86rf230.h>
 #include <linux/w1-gpio.h>
 
 #include <linux/version.h>
@@ -262,6 +263,14 @@ static struct platform_device bcm2708_dmaman_device = {
 	.resource = bcm2708_dmaman_resources,
 	.num_resources = ARRAY_SIZE(bcm2708_dmaman_resources),
 };
+
+#if 1
+static struct at86rf230_platform_data at86rf233_pdata = {
+       .rstn   = 24,
+       .slp_tr = 25,
+       .dig2   = -1,
+};
+#endif
 
 #if defined(CONFIG_W1_MASTER_GPIO) || defined(CONFIG_W1_MASTER_GPIO_MODULE)
 static struct w1_gpio_platform_data w1_gpio_pdata = {
@@ -551,7 +560,14 @@ static struct platform_device bcm2708_spi_device = {
 static struct spi_board_info bcm2708_spi_devices[] = {
 #ifdef CONFIG_SPI_SPIDEV
 	{
+#if 1
+#warning "Using spidev0 for at86rf233"
+		.modalias = "at86rf230",
+		.platform_data = &at86rf233_pdata,
+		.irq = 23,
+#else
 		.modalias = "spidev",
+#endif
 		.max_speed_hz = 500000,
 		.bus_num = 0,
 		.chip_select = 0,
