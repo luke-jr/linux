@@ -370,7 +370,8 @@ static void bcm2708_work(struct work_struct *work)
 		}
 
 		msg->status = status;
-		msg->complete(msg->context);
+		if (msg->complete)
+			msg->complete(msg->context);
 
 		spin_lock_irqsave(&bs->lock, flags);
 	}
