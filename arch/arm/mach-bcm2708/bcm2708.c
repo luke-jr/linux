@@ -53,6 +53,7 @@
 #include <asm/mach/time.h>
 #include <asm/mach/map.h>
 
+#include <mach/gpio.h>
 #include <mach/timex.h>
 #include <mach/dma.h>
 #include <mach/vcio.h>
@@ -564,7 +565,6 @@ static struct spi_board_info bcm2708_spi_devices[] = {
 #warning "Using spidev0 for at86rf233"
 		.modalias = "at86rf230",
 		.platform_data = &at86rf233_pdata,
-		.irq = 23,
 #else
 		.modalias = "spidev",
 #endif
@@ -1074,6 +1074,7 @@ void __init bcm2708_init(void)
 	system_serial_low = serial;
 
 #ifdef CONFIG_BCM2708_SPIDEV
+	bcm2708_spi_devices[0].irq = gpio_to_irq(23);
 	spi_register_board_info(bcm2708_spi_devices,
 			ARRAY_SIZE(bcm2708_spi_devices));
 #endif
