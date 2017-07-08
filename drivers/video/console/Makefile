@@ -19,4 +19,5 @@ ifeq ($(CONFIG_DMI),y)
 obj-$(CONFIG_FRAMEBUFFER_CONSOLE)     += fbcon_dmi_quirks.o
 endif
 
+obj-$(CONFIG_FB_CON_DECOR)     	  += fbcondecor.o cfbcondecor.o
 obj-$(CONFIG_FB_STI)              += sticore.o
